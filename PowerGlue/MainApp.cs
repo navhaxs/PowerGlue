@@ -15,45 +15,7 @@ namespace PowerGlue
 {
     public partial class MainApp : Form
     {
-        static internal void applyConfig(string target_match)
-        {
-            //
-            // Main logic for applying configuration:
-            //
-
-            // Get displays
-            var displays = Display.GetDisplays();
-
-            // Attempt to match
-            var m = displays.Where(d => d.ToString().Contains(target_match)).First();
-
-            // TODO
-            string path = null;
-            string[] try_paths = {
-                @"Software\Microsoft\Office\16.0",
-                @"Software\Microsoft\Office\15.0",
-                @"Software\Microsoft\Office\14.0",
-                @"Software\Microsoft\Office\12.0"
-            };
-
-            foreach (string i in try_paths)
-            {
-                if (Registry.CurrentUser.OpenSubKey(i) != null)
-                {
-                    path = i;
-                }
-            }
-
-            if (path == null)
-            {
-                throw new Exception(@"Did not detect PowerPoint registry key in HKCU\Software\Microsoft\Office\");
-            }
-
-            // Write it to powerpoint's registry
-            RegistryKey key = Registry.CurrentUser.OpenSubKey(path + @"\PowerPoint\Options", true);
-            key.SetValue("DisplayMonitor", m.DisplayName);
-        }
-
+       
         public const string RUN_ARGS = "--startup";
         public static string INI_PATH = Path.Combine(Environment.CurrentDirectory, "powerglue.ini");
 
@@ -61,6 +23,8 @@ namespace PowerGlue
 
         Dictionary<string, DisplayMeta> displays;
         string SelectedDevicePath;
+
+        private DisplayMeta meta;
 
         public MainApp()
         {
@@ -91,7 +55,8 @@ namespace PowerGlue
             displays = DisplayHelper.GetDisplays();
             foreach (var entry in displays)
             {
-                listBox1.Items.Add(entry.Value.GetDisplayName());
+                var x = entry.Value.GetDisplayName();
+                listBox1.Items.Add(x);
             }
 
             // Load config
@@ -106,34 +71,34 @@ namespace PowerGlue
         private bool isLoading = true;
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listBox1.SelectedIndex == -1)
-            {
+            if (listBox1.SelectedIndex < 0)
                 return;
-            }
 
             SelectedDevicePath = displays.ToList()[listBox1.SelectedIndex].Key;
 
             var display = DisplayHelper.LookupFromPath(SelectedDevicePath);
             if (display == null)
-            {
                 return;
-            }
+            var displayDevice = DisplayHelper.GetMeta(display);
 
-            string devicePath = display.DisplayName;
+            label9.Text = $"PowerPoint is set to show the output on display monitor \'{display.DisplayName}\'";
+            
+            redrawChecklist(displayDevice);
 
-            label9.Text = $"PowerPoint is set to show the output on display monitor \'{devicePath}\'";
+            Config.WriteConfig(displayDevice);
+        
+            PowerPointRegistry.applyConfig(display.DisplayName);
+        }
+
+        private void redrawChecklist(DisplayMeta x)
+        {
             checkedListBox1.Items.Clear();
-            checkedListBox1.Items.Add($"[Device Name] {displays.ToList()[listBox1.SelectedIndex].Value.DeviceName}", !String.IsNullOrEmpty(displays.ToList()[listBox1.SelectedIndex].Value.DeviceName));
-            checkedListBox1.Items.Add($"[Friendly Name] {displays.ToList()[listBox1.SelectedIndex].Value.FriendlyName}", !String.IsNullOrEmpty(displays.ToList()[listBox1.SelectedIndex].Value.FriendlyName));
-            checkedListBox1.Items.Add($"[EDID Manufacture Code] {displays.ToList()[listBox1.SelectedIndex].Value.EDIDManufactureCode}", !String.IsNullOrEmpty(displays.ToList()[listBox1.SelectedIndex].Value.EDIDManufactureCode));
-            checkedListBox1.Items.Add($"[EDID Manufacture Id] {displays.ToList()[listBox1.SelectedIndex].Value.EDIDManufactureId}", displays.ToList()[listBox1.SelectedIndex].Value.EDIDManufactureId != null);
-            checkedListBox1.Items.Add($"[EDID Product Code] {displays.ToList()[listBox1.SelectedIndex].Value.EDIDProductCode}", displays.ToList()[listBox1.SelectedIndex].Value.EDIDProductCode != null);
 
-            // Write config
-            IniFile ini = new IniFile(MainApp.INI_PATH);
-            ini.IniWriteValue("PowerPointDisplayMonitor", "Match", SelectedDevicePath);
-
-            applyConfig(devicePath);
+            checkedListBox1.Items.Add($"[Device Name] {x.DeviceName}", !String.IsNullOrEmpty(x.DeviceName));
+            checkedListBox1.Items.Add($"[Friendly Name] {x.FriendlyName}", !String.IsNullOrEmpty(x.FriendlyName));
+            checkedListBox1.Items.Add($"[EDID Manufacture Code] {x.EDIDManufactureCode}", !String.IsNullOrEmpty(x.EDIDManufactureCode));
+            checkedListBox1.Items.Add($"[EDID Manufacture Id] {x.EDIDManufactureId}", x.EDIDManufactureId != null);
+            checkedListBox1.Items.Add($"[EDID Product Code] {x.EDIDProductCode}", x.EDIDProductCode != null);
         }
 
         private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -143,13 +108,21 @@ namespace PowerGlue
                 return;
             }
 
-            // Write config // TODOsa
-            IniFile ini = new IniFile(MainApp.INI_PATH);
-            ini.IniWriteValue("Match", "DeviceName", SelectedDevicePath);
-            ini.IniWriteValue("Match", "FriendlyName", SelectedDevicePath);
-            ini.IniWriteValue("Match", "EDIDManufactureCode", SelectedDevicePath);
-            ini.IniWriteValue("Match", "EDIDManufactureId", SelectedDevicePath);
-            ini.IniWriteValue("Match", "EDIDProductCode", SelectedDevicePath);
+            if (checkedListBox1.SelectedIndex < 0)
+            {
+                return;
+            }
+
+            var display = DisplayHelper.LookupFromPath(SelectedDevicePath);
+            if (display == null)
+                return;
+            var displayDevice = DisplayHelper.GetMeta(display);
+
+            redrawChecklist(displayDevice);
+
+            Config.WriteConfig(displayDevice);
+
+            PowerPointRegistry.applyConfig(display.DisplayName);
         }
     }
 }

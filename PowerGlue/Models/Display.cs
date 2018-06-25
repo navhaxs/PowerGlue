@@ -12,7 +12,7 @@ namespace PowerGlue.Models
         public string EDIDManufactureCode; // e.g. LEN
         public int? EDIDManufactureId; // e.g.44592
         public int? EDIDProductCode; // e.g. 16547
-        public string DevicePath; // Really long string in windows registry.
+        public string DevicePath; // Key/ID: Really long string in windows registry.
 
         public string GetDisplayName()
         {
@@ -30,7 +30,7 @@ namespace PowerGlue.Models
             }
             else
             {
-                return null;
+                return $"{DevicePath}";
             }
         }
     }
@@ -46,10 +46,11 @@ namespace PowerGlue.Models
             targets.ToList().ForEach((d) =>
             {
                 var newInfo = new DisplayMeta() {
-                    FriendlyName = d.FriendlyName,
-                    EDIDManufactureCode = d.EDIDManufactureCode,
-                    EDIDManufactureId = d.EDIDManufactureId,
-                    EDIDProductCode = d.EDIDProductCode
+                    FriendlyName = d.FriendlyName, 
+                    DevicePath = d.DevicePath //,
+                    //EDIDManufactureCode = d.EDIDManufactureCode,
+                    //EDIDManufactureId = d.EDIDManufactureId,
+                    //EDIDProductCode = d.EDIDProductCode
                 };
                 result.Add(d.DevicePath, newInfo);
             });
@@ -61,6 +62,9 @@ namespace PowerGlue.Models
                 if (result.ContainsKey(d.DevicePath))
                 {
                     result[d.DevicePath].DeviceName = d.DeviceName;
+                } else
+                {
+                    result.Add(d.DevicePath, new DisplayMeta() { DeviceName = d.DeviceName });
                 }
             });
 
@@ -108,7 +112,7 @@ namespace PowerGlue.Models
                     });
 
                 if (filteredDisplays.Count() == 0)
-                    throw new Exception("No matching friendly name");
+                    return null; // throw new Exception("No matching friendly name");
 
                 // Get the device path of the target (e.g. \\?\DISPLAY#LEN40A3#4&24eea73b&0&UID265988#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7})
                 targetDisplayPath = filteredDisplays.First().DevicePath;
@@ -141,9 +145,64 @@ namespace PowerGlue.Models
                 });
 
             if (match.Count() == 0)
-                throw new Exception("Did not find display with corresponding display path");
+                return null; // throw new Exception("Did not find display with corresponding display path");
 
             return match.First();
+        }
+
+        public static DisplayMeta GetMeta(WindowsDisplayAPI.Display display)
+        {
+
+            var result = new DisplayMeta();
+           
+            if (!String.IsNullOrEmpty(display.DeviceName)) {
+                result.DeviceName = display.DeviceName;
+            }
+
+            var filtered = WindowsDisplayAPI.DisplayConfig.PathDisplayTarget.GetDisplayTargets().ToList().Where((d) => (d.DevicePath == display.DevicePath));
+            if (filtered.Count() == 0)
+                return result;
+
+            if (!String.IsNullOrEmpty(filtered.First().FriendlyName))
+            {
+                result.FriendlyName = filtered.First().FriendlyName;
+            }
+
+            try
+            {
+                if (!String.IsNullOrEmpty(filtered.First().EDIDManufactureCode))
+                {
+                    result.EDIDManufactureCode = filtered.First().EDIDManufactureCode;
+                }
+            } catch (Exception e)
+            {
+
+            }
+
+            try
+            {
+                if (filtered.First().EDIDManufactureId != null)
+                {
+                    result.EDIDManufactureId = filtered.First().EDIDManufactureId;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            try
+            {
+                if (filtered.First().EDIDProductCode != null)
+                {
+                    result.EDIDProductCode = filtered.First().EDIDProductCode;
+                }
+            } catch (Exception e)
+            {
+
+            }
+
+            return result;
         }
     }
 

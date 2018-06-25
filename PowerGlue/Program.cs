@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using PowerGlue.Models;
 using System;
 using System.IO;
 using System.Linq;
@@ -24,7 +25,7 @@ namespace PowerGlue
                 var target_match = ini.IniReadValue("PowerGlue", "DisplayMonitor"); // e.g. "DELL U2515H(DisplayPort)"
 
                 if (target_match != "") {
-                    MainApp.applyConfig(target_match);
+                    PowerPointRegistry.applyConfig(target_match);
                     return 1;
                 }
             }

@@ -68,6 +68,7 @@
       <DependentUpon>MainApp.cs</DependentUpon>
     </Compile>
     <Compile Include="IniFile.cs" />
+    <Compile Include="Models\Config.cs" />
     <Compile Include="Models\Display.cs" />
     <Compile Include="Models\Form1.cs">
       <SubType>Form</SubType>
