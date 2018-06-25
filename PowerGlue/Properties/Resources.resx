@@ -121,7 +121,4 @@
   <data name="head" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\head.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="powerglue" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\powerglue.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>

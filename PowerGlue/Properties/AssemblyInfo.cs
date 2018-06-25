@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("PowerGlue")]
-[assembly: AssemblyDescription("Ensure that the monitor your intend to display PowerPoint presentations on persists across reboots.")]
+[assembly: AssemblyDescription("A simple utility to lock-down the PowerPoint output monitor.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PowerGlue")]

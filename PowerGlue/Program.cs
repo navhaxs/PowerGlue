@@ -21,7 +21,7 @@ namespace PowerGlue
             {
                 // Load config
                 IniFile ini = new IniFile(Path.Combine(Environment.CurrentDirectory, "powerglue.ini"));
-                var target_match = ini.IniReadValue("PowerPointDisplayMonitor", "Match"); // e.g. "DELL U2515H(DisplayPort)"
+                var target_match = ini.IniReadValue("PowerGlue", "DisplayMonitor"); // e.g. "DELL U2515H(DisplayPort)"
 
                 if (target_match != "") {
                     MainApp.applyConfig(target_match);
@@ -43,13 +43,26 @@ namespace PowerGlue
         // Log errors onto the Desktop
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), $"Error_{DateTime.Now:yyyyMMdd_hhmmss}.txt");
+            IniFile ini = new IniFile(Path.Combine(Environment.CurrentDirectory, "powerglue.ini"));
+            var save_path = ini.IniReadValue("PowerGlue", "LogPath");
+            var fileName = $"Error_{DateTime.Now:yyyyMMdd_hhmmss}.txt";
 
             Exception ex = (Exception)e.ExceptionObject;
+            try
+            {
+                writeErrorlog(Path.Combine(save_path, fileName), ex);
+            } catch
+            {
+                writeErrorlog(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), fileName), ex);
+            }
+        }
+
+        private static void writeErrorlog(String filePath, Exception e)
+        {
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
                 // Dump the error message
-                writer.WriteLine("PowerGlue" + Environment.NewLine + "A tool to lockdown PowerPoint output monitor configuration." + Environment.NewLine + "(c) Jeremy Wong 2018." + Environment.NewLine + "Unhandled error. Message :" + ex.Message + "<br/>" + Environment.NewLine + "StackTrace :" + ex.StackTrace +
+                writer.WriteLine("PowerGlue" + Environment.NewLine + "A tool to lockdown PowerPoint output monitor configuration. Author: Jeremy Wong 2018." + Environment.NewLine + "Unhandled error. Message :" + e.Message + "<br/>" + Environment.NewLine + "StackTrace :" + e.StackTrace +
                    "" + Environment.NewLine + "Date :" + DateTime.Now.ToString());
                 writer.WriteLine(Environment.NewLine + "-----------------------------------------------------------------------------" + Environment.NewLine);
             }

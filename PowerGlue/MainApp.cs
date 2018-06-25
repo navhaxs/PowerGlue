@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using PowerGlue.Models;
 using StartupHelper;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using WindowsDisplayAPI;
+using WindowsDisplayAPI.DisplayConfig;
 
 namespace PowerGlue
 {
@@ -25,8 +27,30 @@ namespace PowerGlue
             // Attempt to match
             var m = displays.Where(d => d.ToString().Contains(target_match)).First();
 
+            // TODO
+            string path = null;
+            string[] try_paths = {
+                @"Software\Microsoft\Office\16.0",
+                @"Software\Microsoft\Office\15.0",
+                @"Software\Microsoft\Office\14.0",
+                @"Software\Microsoft\Office\12.0"
+            };
+
+            foreach (string i in try_paths)
+            {
+                if (Registry.CurrentUser.OpenSubKey(i) != null)
+                {
+                    path = i;
+                }
+            }
+
+            if (path == null)
+            {
+                throw new Exception(@"Did not detect PowerPoint registry key in HKCU\Software\Microsoft\Office\");
+            }
+
             // Write it to powerpoint's registry
-            RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Office\16.0\PowerPoint\Options", true);
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(path + @"\PowerPoint\Options", true);
             key.SetValue("DisplayMonitor", m.DisplayName);
         }
 
@@ -35,8 +59,8 @@ namespace PowerGlue
 
         StartupManager StartupController = new StartupManager("PowerGlue", RegistrationScope.Local, false);
 
-        IEnumerable<Display> displays;
-        string SelectedDisplayName;
+        Dictionary<string, DisplayMeta> displays;
+        string SelectedDevicePath;
 
         public MainApp()
         {
@@ -64,8 +88,11 @@ namespace PowerGlue
 
         private void MainApp_Load(object sender, EventArgs e)
         {
-            displays = Display.GetDisplays();
-            displays.ToList().ForEach(x => listBox1.Items.Add(x.DeviceName));
+            displays = DisplayHelper.GetDisplays();
+            foreach (var entry in displays)
+            {
+                listBox1.Items.Add(entry.Value.GetDisplayName());
+            }
 
             // Load config
             IniFile ini = new IniFile(Path.Combine(Environment.CurrentDirectory, "powerglue.ini"));
@@ -73,20 +100,56 @@ namespace PowerGlue
 
             // This will write the ini
             listBox1.SelectedItem = target_match;
-
         }
 
+
+        private bool isLoading = true;
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            labelDisplayName.Text = SelectedDisplayName = displays.ToList()[listBox1.SelectedIndex].DisplayName;
+            if (listBox1.SelectedIndex == -1)
+            {
+                return;
+            }
 
-            var target_match = displays.ToList()[listBox1.SelectedIndex].DeviceName;
+            SelectedDevicePath = displays.ToList()[listBox1.SelectedIndex].Key;
+
+            var display = DisplayHelper.LookupFromPath(SelectedDevicePath);
+            if (display == null)
+            {
+                return;
+            }
+
+            string devicePath = display.DisplayName;
+
+            label9.Text = $"PowerPoint is set to show the output on display monitor \'{devicePath}\'";
+            checkedListBox1.Items.Clear();
+            checkedListBox1.Items.Add($"[Device Name] {displays.ToList()[listBox1.SelectedIndex].Value.DeviceName}", !String.IsNullOrEmpty(displays.ToList()[listBox1.SelectedIndex].Value.DeviceName));
+            checkedListBox1.Items.Add($"[Friendly Name] {displays.ToList()[listBox1.SelectedIndex].Value.FriendlyName}", !String.IsNullOrEmpty(displays.ToList()[listBox1.SelectedIndex].Value.FriendlyName));
+            checkedListBox1.Items.Add($"[EDID Manufacture Code] {displays.ToList()[listBox1.SelectedIndex].Value.EDIDManufactureCode}", !String.IsNullOrEmpty(displays.ToList()[listBox1.SelectedIndex].Value.EDIDManufactureCode));
+            checkedListBox1.Items.Add($"[EDID Manufacture Id] {displays.ToList()[listBox1.SelectedIndex].Value.EDIDManufactureId}", displays.ToList()[listBox1.SelectedIndex].Value.EDIDManufactureId != null);
+            checkedListBox1.Items.Add($"[EDID Product Code] {displays.ToList()[listBox1.SelectedIndex].Value.EDIDProductCode}", displays.ToList()[listBox1.SelectedIndex].Value.EDIDProductCode != null);
 
             // Write config
             IniFile ini = new IniFile(MainApp.INI_PATH);
-            ini.IniWriteValue("PowerPointDisplayMonitor", "Match", target_match);
+            ini.IniWriteValue("PowerPointDisplayMonitor", "Match", SelectedDevicePath);
 
-            applyConfig(target_match);
+            applyConfig(devicePath);
+        }
+
+        private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isLoading)
+            {
+                return;
+            }
+
+            // Write config // TODOsa
+            IniFile ini = new IniFile(MainApp.INI_PATH);
+            ini.IniWriteValue("Match", "DeviceName", SelectedDevicePath);
+            ini.IniWriteValue("Match", "FriendlyName", SelectedDevicePath);
+            ini.IniWriteValue("Match", "EDIDManufactureCode", SelectedDevicePath);
+            ini.IniWriteValue("Match", "EDIDManufactureId", SelectedDevicePath);
+            ini.IniWriteValue("Match", "EDIDProductCode", SelectedDevicePath);
         }
     }
 }
