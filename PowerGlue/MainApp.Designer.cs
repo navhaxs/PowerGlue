@@ -28,11 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label10 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.panel2 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.labelAutostartStatus = new System.Windows.Forms.Label();
@@ -41,8 +41,10 @@
             this.labelDetectionServiceRunning = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.checkBoxDetectionServiceRunning = new System.Windows.Forms.CheckBox();
+            this.checkBoxAutostartStatus = new System.Windows.Forms.CheckBox();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -69,7 +71,6 @@
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.panel1.Controls.Add(this.label10);
             this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.panel2);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Font = new System.Drawing.Font("Segoe UI", 8.25F);
             this.panel1.ForeColor = System.Drawing.Color.White;
@@ -87,7 +88,7 @@
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(606, 45);
             this.label10.TabIndex = 16;
-            this.label10.Text = "Lock-down the PowerPoint output monitor on systems with 3+ extended displays";
+            this.label10.Text = "Force the PowerPoint output monitor";
             // 
             // label1
             // 
@@ -95,30 +96,19 @@
             this.label1.Font = new System.Drawing.Font("Segoe UI Semibold", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(18, 23);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(434, 28);
+            this.label1.Size = new System.Drawing.Size(110, 28);
             this.label1.TabIndex = 0;
-            this.label1.Text = "PowerGlue - PowerPoint output display helper";
-            // 
-            // panel2
-            // 
-            this.panel2.BackgroundImage = global::PowerGlue.Properties.Resources.head;
-            this.panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel2.Location = new System.Drawing.Point(263, 0);
-            this.panel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(619, 106);
-            this.panel2.TabIndex = 3;
+            this.label1.Text = "PowerGlue";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Bold);
+            this.label3.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(19, 129);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(449, 21);
+            this.label3.Size = new System.Drawing.Size(663, 23);
             this.label3.TabIndex = 5;
-            this.label3.Text = "Select the display for the PowerPoint output to appear on";
+            this.label3.Text = "Select the display for the PowerPoint output to appear on (applied immediately):";
             // 
             // label8
             // 
@@ -129,14 +119,14 @@
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(263, 20);
             this.label8.TabIndex = 0;
-            this.label8.Text = "Build 20180618 (C) Jeremy Wong 2018";
+            this.label8.Text = "Build 20180711 (C) Jeremy Wong 2018";
             // 
             // labelAutostartStatus
             // 
             this.labelAutostartStatus.AutoSize = true;
             this.labelAutostartStatus.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.labelAutostartStatus.ForeColor = System.Drawing.Color.ForestGreen;
-            this.labelAutostartStatus.Location = new System.Drawing.Point(6, 29);
+            this.labelAutostartStatus.Location = new System.Drawing.Point(291, 35);
             this.labelAutostartStatus.Name = "labelAutostartStatus";
             this.labelAutostartStatus.Size = new System.Drawing.Size(206, 20);
             this.labelAutostartStatus.TabIndex = 13;
@@ -167,11 +157,11 @@
             this.labelDetectionServiceRunning.AutoSize = true;
             this.labelDetectionServiceRunning.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.labelDetectionServiceRunning.ForeColor = System.Drawing.Color.ForestGreen;
-            this.labelDetectionServiceRunning.Location = new System.Drawing.Point(285, 29);
+            this.labelDetectionServiceRunning.Location = new System.Drawing.Point(291, 66);
             this.labelDetectionServiceRunning.Name = "labelDetectionServiceRunning";
-            this.labelDetectionServiceRunning.Size = new System.Drawing.Size(263, 20);
+            this.labelDetectionServiceRunning.Size = new System.Drawing.Size(131, 20);
             this.labelDetectionServiceRunning.TabIndex = 20;
-            this.labelDetectionServiceRunning.Text = "Monitor detection service is running";
+            this.labelDetectionServiceRunning.Text = "xxxxxx is running";
             // 
             // groupBox1
             // 
@@ -183,12 +173,13 @@
             this.groupBox1.Size = new System.Drawing.Size(846, 160);
             this.groupBox1.TabIndex = 22;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "For experts: Match criteria";
+            this.groupBox1.Text = "Debug info";
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.checkBox2);
-            this.groupBox2.Controls.Add(this.checkBox1);
+            this.groupBox2.Controls.Add(this.linkLabel1);
+            this.groupBox2.Controls.Add(this.checkBoxDetectionServiceRunning);
+            this.groupBox2.Controls.Add(this.checkBoxAutostartStatus);
             this.groupBox2.Controls.Add(this.labelAutostartStatus);
             this.groupBox2.Controls.Add(this.labelDetectionServiceRunning);
             this.groupBox2.Location = new System.Drawing.Point(19, 362);
@@ -198,25 +189,44 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Ensure your preference sticks across reboots && monitor disconnects";
             // 
-            // checkBox1
+            // linkLabel1
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(27, 69);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(105, 25);
-            this.checkBox1.TabIndex = 21;
-            this.checkBox1.Text = "checkBox1";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Location = new System.Drawing.Point(560, 65);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(170, 21);
+            this.linkLabel1.TabIndex = 23;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "Start monitor manually";
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
-            // checkBox2
+            // checkBoxDetectionServiceRunning
             // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(303, 74);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(105, 25);
-            this.checkBox2.TabIndex = 22;
-            this.checkBox2.Text = "checkBox2";
-            this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBoxDetectionServiceRunning.AutoSize = true;
+            this.checkBoxDetectionServiceRunning.Location = new System.Drawing.Point(21, 64);
+            this.checkBoxDetectionServiceRunning.Name = "checkBoxDetectionServiceRunning";
+            this.checkBoxDetectionServiceRunning.Size = new System.Drawing.Size(246, 25);
+            this.checkBoxDetectionServiceRunning.TabIndex = 22;
+            this.checkBoxDetectionServiceRunning.Text = "Start event watcher on start-up";
+            this.checkBoxDetectionServiceRunning.UseVisualStyleBackColor = true;
+            this.checkBoxDetectionServiceRunning.CheckedChanged += new System.EventHandler(this.checkBoxDetectionServiceRunning_CheckedChanged);
+            // 
+            // checkBoxAutostartStatus
+            // 
+            this.checkBoxAutostartStatus.AutoSize = true;
+            this.checkBoxAutostartStatus.Location = new System.Drawing.Point(21, 33);
+            this.checkBoxAutostartStatus.Name = "checkBoxAutostartStatus";
+            this.checkBoxAutostartStatus.Size = new System.Drawing.Size(153, 25);
+            this.checkBoxAutostartStatus.TabIndex = 21;
+            this.checkBoxAutostartStatus.Text = "Apply on start-up";
+            this.checkBoxAutostartStatus.UseVisualStyleBackColor = true;
+            this.checkBoxAutostartStatus.CheckedChanged += new System.EventHandler(this.checkBoxAutostartStatus_CheckedChanged);
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // MainApp
             // 
@@ -251,7 +261,6 @@
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label labelAutostartStatus;
@@ -261,8 +270,10 @@
         private System.Windows.Forms.Label labelDetectionServiceRunning;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.CheckBox checkBox2;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox checkBoxDetectionServiceRunning;
+        private System.Windows.Forms.CheckBox checkBoxAutostartStatus;
+        private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 

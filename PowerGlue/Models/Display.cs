@@ -33,6 +33,22 @@ namespace PowerGlue.Models
                 return $"{DevicePath}";
             }
         }
+
+        public string GetShortName()
+        {
+            if (!String.IsNullOrEmpty(FriendlyName))
+            {
+                return $"{FriendlyName}";
+            }
+            else if (String.IsNullOrEmpty(FriendlyName))
+            {
+                return $"{DeviceName}";
+            }
+            else
+            {
+                return $"{DevicePath}";
+            }
+        }
     }
 
     public static class DisplayHelper

@@ -1,10 +1,8 @@
-﻿using Microsoft.Win32;
-using PowerGlue.Models;
+﻿using PowerGlue.Models;
 using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using WindowsDisplayAPI;
 
 namespace PowerGlue
 {
@@ -18,20 +16,50 @@ namespace PowerGlue
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
-            if (args.Length == 1 && args[0].ToLower() == MainApp.RUN_ARGS)
+            bool IsArgsHandled = false;
+            if (args.Contains(Constants.AUTOSTART_ARG))
             {
-                // Load config
-                IniFile ini = new IniFile(Path.Combine(Environment.CurrentDirectory, "powerglue.ini"));
-                var target_match = ini.IniReadValue("PowerGlue", "DisplayMonitor"); // e.g. "DELL U2515H(DisplayPort)"
+                IsArgsHandled = true;
 
-                if (target_match != "") {
-                    PowerPointRegistry.applyConfig(target_match);
-                    return 1;
+                try
+                {
+                    Run();
+                } catch (Exception e) {
+                    return -1;
                 }
+                return 1;
             }
 
-            loadForm();
+            if (args.Contains(Constants.MONITOR_ARG))
+            {
+                IsArgsHandled = true;
+                Application.Run(new EventWatcher());
+            }
+
+
+            if (!IsArgsHandled)
+            {
+                loadForm();
+            }
+
+
             return 1;
+        }
+
+        /*
+         * Main logic. Run this to apply the powerpoint registry hack.
+         */
+        static public void Run()
+        {
+            // Load config
+            DisplayMeta res = Config.LoadConfig();
+            var display = DisplayHelper.LookupFromMatch(res);
+            if (display == null)
+            {
+                // @todo log this event: Apply fail on autostart
+                return;
+            }
+            PowerPointRegistry.applyConfig(display.DisplayName);
         }
 
         static private void loadForm()

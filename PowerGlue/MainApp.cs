@@ -1,25 +1,18 @@
-﻿using Microsoft.Win32;
-using PowerGlue.Models;
-using StartupHelper;
+﻿using PowerGlue.Models;
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using WindowsDisplayAPI;
-using WindowsDisplayAPI.DisplayConfig;
 
 namespace PowerGlue
 {
     public partial class MainApp : Form
-    {
-       
-        public const string RUN_ARGS = "--startup";
-        public static string INI_PATH = Path.Combine(Environment.CurrentDirectory, "powerglue.ini");
+    {       
 
-        StartupManager StartupController = new StartupManager("PowerGlue", RegistrationScope.Local, false);
+        StartupModel startup = new StartupModel();
 
         Dictionary<string, DisplayMeta> displays;
         string SelectedDevicePath;
@@ -29,44 +22,50 @@ namespace PowerGlue
         public MainApp()
         {
             InitializeComponent();
-            updateUI();
+            UpdateUI();
+            UpdateMonitorStatus();
+        }
+        private void UpdateMonitorStatus()
+        {
+            labelDetectionServiceRunning.ForeColor = EventWatcher.isRunning() ? Color.ForestGreen : Color.Red;
+            labelDetectionServiceRunning.Text = "Event watcher is " + (EventWatcher.isRunning() ? "running" : "not running");
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void UpdateUI()
         {
-            if (!checkBox1.Checked) {
-                StartupController.Register();
-            } else {
-                StartupController.Unregister();
-            }
-            updateUI();
-        }
+            checkBoxAutostartStatus.Checked = startup.IsRegistered();
+            labelAutostartStatus.ForeColor = checkBoxAutostartStatus.Checked ? Color.ForestGreen : Color.Red;
+            labelAutostartStatus.Text = "Apply on start-up is " + (checkBoxAutostartStatus.Checked ? "enabled" : "disabled");
 
-        private void updateUI()
-        {
-            checkBox1.Checked = !StartupController.IsRegistered;
-            labelAutostartStatus.ForeColor = checkBox1.Checked ? Color.Red : Color.ForestGreen;
-            labelAutostartStatus.Text = checkBox1.Checked ? "Apply on start-up is disabled" : "Apply on start-up is enabled";
-            checkBox1.Text = checkBox1.Checked ? "Click to enable" : "Click to disable";
+            checkBoxDetectionServiceRunning.Checked = Config.GetWacherEnabled();
+
+            checkBoxDetectionServiceRunning.Enabled = checkBoxAutostartStatus.Checked;
         }
 
         private void MainApp_Load(object sender, EventArgs e)
         {
+            var config = Config.LoadConfig();
+
+
+            var display = DisplayHelper.LookupFromMatch(config);
+
+
             displays = DisplayHelper.GetDisplays();
             foreach (var entry in displays)
             {
                 var x = entry.Value.GetDisplayName();
-                listBox1.Items.Add(x);
+                var index = listBox1.Items.Add(x);
+
+                if (display != null && entry.Value.DevicePath == display.DevicePath)
+                {
+                    listBox1.SelectedIndex = index;
+                }
             }
 
-            // Load config
-            IniFile ini = new IniFile(Path.Combine(Environment.CurrentDirectory, "powerglue.ini"));
-            var target_match = ini.IniReadValue("PowerPointDisplayMonitor", "Match"); // e.g. "DELL U2515H(DisplayPort)"
 
-            // This will write the ini
-            listBox1.SelectedItem = target_match;
+            // default initialize checklist with values from config
+            redrawChecklist(config);
         }
-
 
         private bool isLoading = true;
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -123,6 +122,40 @@ namespace PowerGlue
             Config.WriteConfig(displayDevice);
 
             PowerPointRegistry.applyConfig(display.DisplayName);
+        }
+
+        private void checkBoxDetectionServiceRunning_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.SetWacherEnabled(checkBoxDetectionServiceRunning.Checked);
+            UpdateUI();
+        }
+
+        private void checkBoxAutostartStatus_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxAutostartStatus.Checked)
+            {
+                startup.Register();
+            }
+            else
+            {
+                startup.Unregister();
+            }
+            UpdateUI();
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            ProcessStartInfo Info = new ProcessStartInfo();
+            Info.Arguments = Constants.MONITOR_ARG;
+            Info.FileName = Application.ExecutablePath;
+            Process.Start(Info);
+
+            UpdateUI();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            UpdateMonitorStatus();
         }
     }
 }
