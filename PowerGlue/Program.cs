@@ -1,4 +1,5 @@
 ﻿using PowerGlue.Models;
+using PowerGlue.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -84,18 +85,8 @@ namespace PowerGlue
         // Log errors to a file in the current directory
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            IniFile ini = new IniFile(Path.Combine(Environment.CurrentDirectory, "powerglue.ini"));
-            var save_path = ini.IniReadValue("PowerGlue", "LogPath");
-            var fileName = $"Error_{DateTime.Now:yyyyMMdd_hhmmss}.txt";
-
             Exception ex = (Exception)e.ExceptionObject;
-            try
-            {
-                Utils.CrashLogging.DumpErrorToFile(Path.Combine(save_path, fileName), ex);
-            } catch
-            {
-                Utils.CrashLogging.DumpErrorToFile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), fileName), ex);
-            }
+            CrashLogging.DumpError(ex);
         }
     }
 }

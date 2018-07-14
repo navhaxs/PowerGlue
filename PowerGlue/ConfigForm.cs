@@ -1,4 +1,5 @@
 ﻿using PowerGlue.Models;
+using PowerGlue.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,6 +51,19 @@ namespace PowerGlue
 
             // default initialize checklist with values from config
             RedrawChecklist(Config.LoadConfig());
+
+            // Update the task scheduler event in case the EXE location has changed
+            try
+            {
+                if (startup.IsRegistered())
+                {
+                    startup.Unregister();
+                    startup.Register();
+                }
+            } catch (Exception ex)
+            {
+                CrashLogging.DumpError(ex);
+            }
         }
 
         private void Rescan()
