@@ -59,5 +59,35 @@ namespace PowerGlue.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon CSOfficePowerpoint2013Application {
+            get {
+                object obj = ResourceManager.GetObject("CSOfficePowerpoint2013Application", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon StatusNo_cyan {
+            get {
+                object obj = ResourceManager.GetObject("StatusNo_cyan", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon StatusOK {
+            get {
+                object obj = ResourceManager.GetObject("StatusOK", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
     }
 }

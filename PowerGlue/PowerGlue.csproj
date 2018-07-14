@@ -113,10 +113,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />
+    <None Include="Resources\StatusOK.ico" />
+    <None Include="Resources\StatusNo_cyan.ico" />
+    <None Include="Resources\CSOfficePowerpoint2013Application.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Lib\FileLock\FileLock.csproj">
       <Project>{e1a511e9-b595-495a-a495-12fb8d95755f}</Project>

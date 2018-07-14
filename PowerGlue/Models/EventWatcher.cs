@@ -16,23 +16,37 @@ namespace PowerGlue.Models
 
         private SimpleFileLock fileLock = null;
 
-        public EventWatcher(SimpleFileLock simpleFileLock) : this()
+        public enum RUN_MODE
         {
-            fileLock = simpleFileLock;
+            MONITOR,
+            ONCE
         }
 
-        public EventWatcher()
+        private RUN_MODE runOnlyOnce;
+
+        public EventWatcher(RUN_MODE mode)
         {
             InitializeComponent();
 
-            var fileLock = SimpleFileLock.Create(Constants.PIDLOCK_PATH);
-            if (!fileLock.TryAcquireLock())
+            this.runOnlyOnce = mode;
+
+            if (mode == RUN_MODE.MONITOR)
             {
-                Close();
-            } else
-            {
+                var fileLock = SimpleFileLock.Create(Constants.PIDLOCK_PATH);
+                if (!fileLock.TryAcquireLock())
+                {
+                    Close();
+                    // Another instance of this program is already running on the machine/
+                    // Silent exit
+                    return;
+                }
+
                 SystemEvents.PowerModeChanged += OnPowerChange;
                 this.FormClosed += EventWatcher_FormClosed;
+
+            } else if (mode == RUN_MODE.ONCE)
+            {
+                doWork();
             }
         }
 
@@ -106,11 +120,13 @@ namespace PowerGlue.Models
         {
             if (Program.Run())
             {
-                showBalloon($"Applied settings\n\nPowerPoint will output on display \"{Config.LoadConfig().GetShortName()}\"");
+                if (!Program.SilentMode) showBalloon($"Applied settings\n\nPowerPoint will output on display \"{Config.LoadConfig().GetShortName()}\"");
+                FlashIcon(Constants.OK_ICON);
             }
             else
             {
-                showBalloon($"Failed to apply settings\n\nDid not detect display \"{Config.LoadConfig().GetShortName()}\"");
+                if (!Program.SilentMode) showBalloon($"Failed to apply settings\n\nDid not detect display \"{Config.LoadConfig().GetShortName()}\"");
+                FlashIcon(Constants.NO_ICON);
             }
         }
 
@@ -132,6 +148,49 @@ namespace PowerGlue.Models
             //title = (title.Length >= 64) ? title.Substring(0, 60) + "..." : title;
             notifyIcon1.BalloonTipText = title;
             notifyIcon1.ShowBalloonTip(30);
+        }
+
+        private void EventWatcher_Load(object sender, EventArgs e)
+        {
+            notifyIcon1.Icon = Constants.DEFAULT_ICON;
+        }
+
+        private int flashCounter;
+        private System.Drawing.Icon icon;
+
+        private void FlashIcon(System.Drawing.Icon icon)
+        {
+
+            if (iconFlashTimer.Enabled)
+            {
+                iconFlashTimer.Stop();
+            }
+
+            this.icon = icon;
+            flashCounter = 0;
+
+            iconFlashTimer.Start();
+        }
+
+        private void iconFlashTimer_Tick(object sender, EventArgs e)
+        {
+            flashCounter += 1;
+            
+
+            if (flashCounter > 6)
+            {
+                iconFlashTimer.Stop();
+                notifyIcon1.Icon = Constants.DEFAULT_ICON;
+
+                if (this.runOnlyOnce == RUN_MODE.ONCE)
+                {
+                    Close();
+                }
+
+                return;
+            }
+
+            notifyIcon1.Icon = (flashCounter % 2 == 0) ? icon : Constants.DEFAULT_ICON;
         }
     }
 }

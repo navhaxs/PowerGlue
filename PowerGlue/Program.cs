@@ -1,5 +1,6 @@
 ﻿using PowerGlue.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -16,37 +17,41 @@ namespace PowerGlue
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
-            bool IsArgsHandled = false;
-            if (args.Contains(Constants.AUTOSTART_ARG))
-            {
-                IsArgsHandled = true;
+            List<string> argsList = new List<string>(args);
 
-                try
+            SilentMode = args.Contains(Constants.SILENT_ARG);
+
+            if (argsList.Contains(Constants.AUTOSTART_ARG))
+            {
+                argsList.Add((Config.GetWacherEnabled()) ? Constants.MONITOR_ARG : Constants.ONCE_ARG);
+            }
+
+            if (argsList.Contains(Constants.MONITOR_ARG))
+            {
+                // Start the monitor service
+                Application.Run(new EventWatcher(EventWatcher.RUN_MODE.MONITOR));
+            }
+            else if (argsList.Contains(Constants.ONCE_ARG))
+            {
+                // Run the monitor service if flag specified, regardless of config
+                if (SilentMode)
                 {
-                    // @todo move balloon here
+                    // Run silently
                     Run();
-                } catch (Exception e) {
-                    return -1;
                 }
-            }
-
-            // @todo silent flag
-
-            if (args.Contains(Constants.MONITOR_ARG))
-            {
-                IsArgsHandled = true;
-                Application.Run(new EventWatcher());
-            }
-
-
-            if (!IsArgsHandled)
-            {
+                else
+                {
+                    // Run with Form wrapper to show balloon message
+                    Application.Run(new EventWatcher(EventWatcher.RUN_MODE.ONCE));
+                }
+            } else {
                 loadForm();
             }
 
-
             return 1;
         }
+
+        public static bool SilentMode = false;
 
         /*
          * Main logic. Run this to apply the powerpoint registry hack.

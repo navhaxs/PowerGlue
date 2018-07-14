@@ -45,10 +45,7 @@ namespace PowerGlue
         private void MainApp_Load(object sender, EventArgs e)
         {
             var config = Config.LoadConfig();
-
-
             var display = DisplayHelper.LookupFromMatch(config);
-
 
             displays = DisplayHelper.GetDisplays();
             foreach (var entry in displays)
