@@ -1,40 +1,24 @@
-# PowerGlue
-Force PowerPoint to output on the display you want it to output on.
+# PowerGlue 
+#### A tool to force PowerPoint to output on the projector display, regardless if Windows messes up the display number!
 
-### What does this solve?
+> PowerPoint stores the output display as `DisplayMonitor` in the registry. For example,  this value could be  `\\.\DISPLAY2` which could refer a projector you've got hooked up.
+> 
+> It turns out that this `\\.\DISPLAY2` identifier is **not** unique to the display itself! Windows can reassign it to some other physical display (say, a third monitor which isn't the main projector). Things like which order you power-on the devices can affect this.
 
-Sometimes PowerPoint unexpectedly outputs onto the wrong monitor. 
+PowerGlue is a tool which attempts to **always set the correct `DisplayMonitor` value.**
 
-Say you more than two displays on your Windows machine: the laptop screen, one output to a projector, and an extra third monitor. You *really* want the PowerPoint to output on the projector - but for some reason, **occasionally** PowerPoint decides to output on wrong monitor instead.
+### Usage
 
-This tool fixes that behaviour.
+1. Download the tool and save it somewhere - a config file will get created in this folder
 
-### How to use
+2. Run the tool. Select which display is the main projector.
 
-Download the tool and save it somewhere with write access to that folder (it writes a  config file).
+> Via a bunch of Windows API's and EDID info, the tool will retrieve the up-to-date `\\.\DISPLAYXXX` value and write it to PowerPoint's registry. Test it out - pressing F5 in PowerPoint should now show the output on your chosen display. (Changes shoud take effect immediately)
 
-Run the tool. When you select a monitor, the changes will get applied.
+3. Enable the log-in task and event watcher
 
-Test that the changes work by starting a PowerPoint presentation and making sure that the output appears on the display you expect.
+> This will run a tiny service in the system tray which will fire on log-in, and every time a Windows monitor change is detected.
 
-Hit 'Enable Auto-start' so the tool will re-apply your chosen preference everytime someone logs onto the PC.
+### Options
 
-### Technical info for the curious
-
-PowerPoint stores the DisplayMonitor in the registry, for example the value `\\.\DISPLAY2` which might happen to refer to some `DELL` monitor you've got hooked up.
-
-This `\\.\DISPLAY2` identifier is **not** unique to the display.
-
-If you were to mess around with the Windows display settings, re-attach displays in a different order and change around with cloned/extended arrangements, `\\.\DISPLAY2` might end up identifying say your other `ViewSonic` monitor.
-
-Now the next time you launch PowerPoint, it will use the `ViewSonic` monitor instead - which isn't what you originally expected!
-
-### How this tool works
-
-After select your favourite output monitor with the tool GUI, this tool will store the monitor name string (e.g. `DELL U2515H`).
-
-It will use this string to figure out what the corresponding  `\\.\DISPLAYxxx` identifier happens to be for that day, and writes it the corresponding PowerPoint registry key.
-
-The tool is designed to re-apply the above procedure on login. A task is created in task scheduler for the current user to execute `PowerGlue.exe --startup`  (the silent mode flag for the tool).
-
-### 
+`--silent` will hide the balloon message. You can manually add this to the arguments of the log-in event (in Task Scheduler).
