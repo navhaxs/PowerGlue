@@ -8,11 +8,12 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>PowerGlue</RootNamespace>
     <AssemblyName>PowerGlue</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -61,17 +62,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MainApp.cs">
+    <Compile Include="Extensions\ActionDebounceExtension.cs" />
+    <Compile Include="ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainApp.Designer.cs">
-      <DependentUpon>MainApp.cs</DependentUpon>
+    <Compile Include="ConfigForm.Designer.cs">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Constants.cs" />
-    <Compile Include="Models\StartupManager.cs" />
+    <Compile Include="Models\ApplyResult.cs" />
+    <Compile Include="Models\LoginAutostart.cs" />
+    <Compile Include="Utils\CrashLogging.cs" />
     <Compile Include="Utils\IniFile.cs" />
     <Compile Include="Models\Config.cs" />
-    <Compile Include="Models\Display.cs" />
+    <Compile Include="Models\DisplayMeta.cs" />
     <Compile Include="Models\EventWatcher.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -81,8 +85,8 @@
     <Compile Include="Models\PowerPointRegistry.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="MainApp.resx">
-      <DependentUpon>MainApp.cs</DependentUpon>
+    <EmbeddedResource Include="ConfigForm.resx">
+      <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Models\EventWatcher.resx">
       <DependentUpon>EventWatcher.cs</DependentUpon>

@@ -1,6 +1,6 @@
 ﻿namespace PowerGlue
 {
-    partial class MainApp
+    partial class ConfigForm
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainApp));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConfigForm));
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.label10 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -47,11 +47,16 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.label1 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             this.SuspendLayout();
             // 
             // listBox1
@@ -65,9 +70,9 @@
             this.listBox1.Location = new System.Drawing.Point(16, 52);
             this.listBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(833, 116);
+            this.listBox1.Size = new System.Drawing.Size(851, 116);
             this.listBox1.TabIndex = 0;
-            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
+            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.ListBox1_SelectedIndexChanged);
             // 
             // label10
             // 
@@ -78,7 +83,7 @@
             this.label10.Location = new System.Drawing.Point(0, 0);
             this.label10.Name = "label10";
             this.label10.Padding = new System.Windows.Forms.Padding(10);
-            this.label10.Size = new System.Drawing.Size(882, 55);
+            this.label10.Size = new System.Drawing.Size(900, 55);
             this.label10.TabIndex = 16;
             this.label10.Text = "A tool to force the PowerPoint output to always show on the projector";
             // 
@@ -88,15 +93,15 @@
             this.label3.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(12, 19);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(658, 23);
+            this.label3.Size = new System.Drawing.Size(631, 23);
             this.label3.TabIndex = 5;
-            this.label3.Text = "Select the display for the PowerPoint output to appear on (applied immediately)";
+            this.label3.Text = "Select the display for the PowerPoint output to appear on (e.g. the projector)";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.Location = new System.Drawing.Point(12, 567);
+            this.label8.Location = new System.Drawing.Point(152, 590);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(111, 20);
             this.label8.TabIndex = 0;
@@ -107,7 +112,7 @@
             this.labelAutostartStatus.AutoSize = true;
             this.labelAutostartStatus.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold);
             this.labelAutostartStatus.ForeColor = System.Drawing.Color.ForestGreen;
-            this.labelAutostartStatus.Location = new System.Drawing.Point(297, 34);
+            this.labelAutostartStatus.Location = new System.Drawing.Point(314, 34);
             this.labelAutostartStatus.Name = "labelAutostartStatus";
             this.labelAutostartStatus.Size = new System.Drawing.Size(238, 23);
             this.labelAutostartStatus.TabIndex = 13;
@@ -130,16 +135,16 @@
             this.checkedListBox1.FormattingEnabled = true;
             this.checkedListBox1.Location = new System.Drawing.Point(7, 28);
             this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(833, 129);
+            this.checkedListBox1.Size = new System.Drawing.Size(851, 129);
             this.checkedListBox1.TabIndex = 17;
-            this.checkedListBox1.SelectedIndexChanged += new System.EventHandler(this.checkedListBox1_SelectedIndexChanged);
+            this.checkedListBox1.SelectedIndexChanged += new System.EventHandler(this.CheckedListBox1_SelectedIndexChanged);
             // 
             // labelDetectionServiceRunning
             // 
             this.labelDetectionServiceRunning.AutoSize = true;
             this.labelDetectionServiceRunning.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold);
             this.labelDetectionServiceRunning.ForeColor = System.Drawing.Color.ForestGreen;
-            this.labelDetectionServiceRunning.Location = new System.Drawing.Point(297, 65);
+            this.labelDetectionServiceRunning.Location = new System.Drawing.Point(314, 65);
             this.labelDetectionServiceRunning.Name = "labelDetectionServiceRunning";
             this.labelDetectionServiceRunning.Size = new System.Drawing.Size(149, 23);
             this.labelDetectionServiceRunning.TabIndex = 20;
@@ -151,15 +156,17 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.checkedListBox1);
             this.groupBox1.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(9, 400);
+            this.groupBox1.Location = new System.Drawing.Point(9, 423);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(846, 164);
+            this.groupBox1.Size = new System.Drawing.Size(864, 164);
             this.groupBox1.TabIndex = 22;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Debug info";
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.pictureBox3);
+            this.groupBox2.Controls.Add(this.pictureBox2);
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.linkLabel1);
             this.groupBox2.Controls.Add(this.checkBoxDetectionServiceRunning);
@@ -167,9 +174,9 @@
             this.groupBox2.Controls.Add(this.labelAutostartStatus);
             this.groupBox2.Controls.Add(this.labelDetectionServiceRunning);
             this.groupBox2.Font = new System.Drawing.Font("Segoe UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(9, 247);
+            this.groupBox2.Location = new System.Drawing.Point(9, 228);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(846, 147);
+            this.groupBox2.Size = new System.Drawing.Size(846, 189);
             this.groupBox2.TabIndex = 24;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Ensure your preference sticks across reboots && monitor re/disconnects";
@@ -178,7 +185,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(439, 115);
+            this.label2.Location = new System.Drawing.Point(17, 149);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(401, 20);
             this.label2.TabIndex = 26;
@@ -188,13 +195,13 @@
             // 
             this.linkLabel1.AutoSize = true;
             this.linkLabel1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.linkLabel1.Location = new System.Drawing.Point(640, 92);
+            this.linkLabel1.Location = new System.Drawing.Point(17, 122);
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.Size = new System.Drawing.Size(200, 20);
             this.linkLabel1.TabIndex = 23;
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "Start event watcher manually";
-            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel1_LinkClicked);
             // 
             // checkBoxDetectionServiceRunning
             // 
@@ -206,7 +213,7 @@
             this.checkBoxDetectionServiceRunning.TabIndex = 22;
             this.checkBoxDetectionServiceRunning.Text = "Start event watcher on login";
             this.checkBoxDetectionServiceRunning.UseVisualStyleBackColor = true;
-            this.checkBoxDetectionServiceRunning.CheckedChanged += new System.EventHandler(this.checkBoxDetectionServiceRunning_CheckedChanged);
+            this.checkBoxDetectionServiceRunning.CheckedChanged += new System.EventHandler(this.CheckBoxDetectionServiceRunning_CheckedChanged);
             // 
             // checkBoxAutostartStatus
             // 
@@ -218,19 +225,19 @@
             this.checkBoxAutostartStatus.TabIndex = 21;
             this.checkBoxAutostartStatus.Text = "Apply on login";
             this.checkBoxAutostartStatus.UseVisualStyleBackColor = true;
-            this.checkBoxAutostartStatus.CheckedChanged += new System.EventHandler(this.checkBoxAutostartStatus_CheckedChanged);
+            this.checkBoxAutostartStatus.CheckedChanged += new System.EventHandler(this.CheckBoxAutostartStatus_CheckedChanged);
             // 
             // timer1
             // 
             this.timer1.Enabled = true;
             this.timer1.Interval = 1000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(12, 589);
+            this.label1.Location = new System.Drawing.Point(12, 590);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(134, 20);
             this.label1.TabIndex = 25;
@@ -239,6 +246,7 @@
             // panel1
             // 
             this.panel1.AutoScroll = true;
+            this.panel1.Controls.Add(this.linkLabel2);
             this.panel1.Controls.Add(this.pictureBox1);
             this.panel1.Controls.Add(this.listBox1);
             this.panel1.Controls.Add(this.label3);
@@ -250,8 +258,19 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 55);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(882, 618);
+            this.panel1.Size = new System.Drawing.Size(900, 665);
             this.panel1.TabIndex = 26;
+            // 
+            // linkLabel2
+            // 
+            this.linkLabel2.AutoSize = true;
+            this.linkLabel2.Location = new System.Drawing.Point(790, 27);
+            this.linkLabel2.Name = "linkLabel2";
+            this.linkLabel2.Size = new System.Drawing.Size(59, 21);
+            this.linkLabel2.TabIndex = 27;
+            this.linkLabel2.TabStop = true;
+            this.linkLabel2.Text = "Rescan";
+            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LinkLabel2_LinkClicked);
             // 
             // pictureBox1
             // 
@@ -262,7 +281,25 @@
             this.pictureBox1.TabIndex = 26;
             this.pictureBox1.TabStop = false;
             // 
-            // MainApp
+            // pictureBox2
+            // 
+            this.pictureBox2.Location = new System.Drawing.Point(284, 34);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(24, 24);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox2.TabIndex = 27;
+            this.pictureBox2.TabStop = false;
+            // 
+            // pictureBox3
+            // 
+            this.pictureBox3.Location = new System.Drawing.Point(284, 67);
+            this.pictureBox3.Name = "pictureBox3";
+            this.pictureBox3.Size = new System.Drawing.Size(24, 24);
+            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox3.TabIndex = 28;
+            this.pictureBox3.TabStop = false;
+            // 
+            // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -270,9 +307,12 @@
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.label10);
             this.Font = new System.Drawing.Font("Segoe UI", 9.5F);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.MaximizeBox = false;
             this.MinimumSize = new System.Drawing.Size(900, 720);
-            this.Name = "MainApp";
+            this.Name = "ConfigForm";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "PowerGlue";
             this.Load += new System.EventHandler(this.MainApp_Load);
             this.groupBox1.ResumeLayout(false);
@@ -281,6 +321,8 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -305,6 +347,9 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.LinkLabel linkLabel2;
+        private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.PictureBox pictureBox2;
     }
 }
 

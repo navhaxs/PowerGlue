@@ -1,64 +1,69 @@
 ﻿using FileLock;
 using Microsoft.Win32;
+using PowerGlue.Extensions;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PowerGlue.Models
 {
     public partial class EventWatcher : Form
     {
-
-        public static bool isRunning()
+        
+        // Public methods
+        public static bool IsRunning()
         {
             var fileLock = SimpleFileLock.Create(Constants.PIDLOCK_PATH);
             return (!fileLock.TestLockIsFree());
         }
 
+        // Variables
         private SimpleFileLock fileLock = null;
-
+        private RUN_MODE runMode;
         public enum RUN_MODE
         {
             MONITOR,
             ONCE
         }
+        Action<int> debouncedWrapper = null;
 
-        private RUN_MODE runOnlyOnce;
-
+        // Constructor
         public EventWatcher(RUN_MODE mode)
         {
             InitializeComponent();
 
-            this.runOnlyOnce = mode;
+            runMode = mode;
+
+            Action<int> a = (arg) =>
+            {
+                DoWork(RUN_MODE.MONITOR);
+            };
+
+            debouncedWrapper = a.Debounce();
 
             if (mode == RUN_MODE.MONITOR)
             {
+                // Set up pidfile to enforce a single instance of the monitor
                 var fileLock = SimpleFileLock.Create(Constants.PIDLOCK_PATH);
                 if (!fileLock.TryAcquireLock())
                 {
                     Close();
-                    // Another instance of this program is already running on the machine/
-                    // Silent exit
+                    // Another instance of this program is already running on the machine (silent exit)
                     return;
                 }
 
                 SystemEvents.PowerModeChanged += OnPowerChange;
                 this.FormClosed += EventWatcher_FormClosed;
 
+                // Run it now
+                DoWork();
             } else if (mode == RUN_MODE.ONCE)
             {
-                doWork();
+                // Run it now
+                DoWork();
             }
         }
-
-        private void EventWatcher_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            if (fileLock != null)
-            {
-                fileLock.ReleaseLock();
-            }
-        }
-
-        private DateTime lastUpdate;
 
         #region "hide winform"
         // a winform is requried to receive WndProc messages, but we want to hide the actual winform itself
@@ -86,7 +91,7 @@ namespace PowerGlue.Models
             switch ((uint)m.Msg)
             {
                 case WM_DISPLAYCHANGE:
-                    onMonitorStateChange();
+                    OnMonitorStateChange();
                     break;
             }
 
@@ -99,7 +104,7 @@ namespace PowerGlue.Models
             switch (e.Mode)
             {
                 case PowerModes.Resume:
-                    onMonitorStateChange();
+                    OnMonitorStateChange();
                     break;
             }
         }
@@ -107,47 +112,10 @@ namespace PowerGlue.Models
         #endregion
 
         #region "event handler"
-        //
-        private void onMonitorStateChange()
-        {
-            // hack: replace with an event debouncer
-            System.Threading.Thread.Sleep(2000);
-            doWork();
-        }
-        #endregion
 
-        private void doWork()
+        private void OnMonitorStateChange()
         {
-            if (Program.Run())
-            {
-                if (!Program.SilentMode) showBalloon($"Applied settings\n\nPowerPoint will output on display \"{Config.LoadConfig().GetShortName()}\"");
-                FlashIcon(Constants.OK_ICON);
-            }
-            else
-            {
-                if (!Program.SilentMode) showBalloon($"Failed to apply settings\n\nDid not detect display \"{Config.LoadConfig().GetShortName()}\"");
-                FlashIcon(Constants.NO_ICON);
-            }
-        }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                doWork();
-            }
-        }
-
-        private void showBalloon(string title)
-        {
-            //title = (title.Length >= 64) ? title.Substring(0, 60) + "..." : title;
-            notifyIcon1.BalloonTipText = title;
-            notifyIcon1.ShowBalloonTip(30);
+            debouncedWrapper(3000); 
         }
 
         private void EventWatcher_Load(object sender, EventArgs e)
@@ -155,12 +123,69 @@ namespace PowerGlue.Models
             notifyIcon1.Icon = Constants.DEFAULT_ICON;
         }
 
+        private void EventWatcher_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (fileLock != null)
+            {
+                fileLock.ReleaseLock();
+            }
+        }
+
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                DoWork();
+            }
+        }
+
+        #endregion
+
+        #region "main logic"
+        private delegate void DoWorkDelegate(RUN_MODE mode);
+        void DoWork(RUN_MODE mode = RUN_MODE.ONCE)
+        {
+            if (InvokeRequired)
+                Invoke(new DoWorkDelegate(DoWork), mode);
+            else
+            {
+                string reason = (mode == RUN_MODE.MONITOR) ? "Display change detected" : "Applied settings";
+
+                if (Program.Run() == ApplyResult.Success_WriteOK)
+                {
+                    FlashIcon(Constants.OK_ICON);
+                    if (!Program.SilentMode) ShowBalloon($"{reason}\n\nPowerPoint will output on display \"{Config.LoadConfig().GetShortName()}\"");
+                }
+                else if (Program.Run() == ApplyResult.Fail_NotDetected)
+                {
+                    FlashIcon(Constants.NO_ICON);
+                    if (!Program.SilentMode) ShowBalloon($"Failed to apply settings\n\nDid not detect display \"{Config.LoadConfig().GetShortName()}\"");
+                }
+            }
+        }
+
+        #endregion
+
+        #region "balloon ui"
+        private void ShowBalloon(string title)
+        {
+            //title = (title.Length >= 64) ? title.Substring(0, 60) + "..." : title;
+            notifyIcon1.BalloonTipText = title;
+            notifyIcon1.ShowBalloonTip(30);
+        }
+        #endregion
+
+        #region "notification tray icon"
         private int flashCounter;
         private System.Drawing.Icon icon;
 
         private void FlashIcon(System.Drawing.Icon icon)
         {
-
             if (iconFlashTimer.Enabled)
             {
                 iconFlashTimer.Stop();
@@ -172,17 +197,16 @@ namespace PowerGlue.Models
             iconFlashTimer.Start();
         }
 
-        private void iconFlashTimer_Tick(object sender, EventArgs e)
+        private void IconFlashTimer_Tick(object sender, EventArgs e)
         {
             flashCounter += 1;
             
-
             if (flashCounter > 6)
             {
                 iconFlashTimer.Stop();
                 notifyIcon1.Icon = Constants.DEFAULT_ICON;
 
-                if (this.runOnlyOnce == RUN_MODE.ONCE)
+                if (this.runMode == RUN_MODE.ONCE)
                 {
                     Close();
                 }
@@ -192,5 +216,7 @@ namespace PowerGlue.Models
 
             notifyIcon1.Icon = (flashCounter % 2 == 0) ? icon : Constants.DEFAULT_ICON;
         }
+        #endregion
+
     }
 }

@@ -9,6 +9,9 @@ namespace PowerGlue
 {
     static class Program
     {
+
+        public static bool SilentMode = false;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -16,9 +19,8 @@ namespace PowerGlue
         static int Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
-
+        
             List<string> argsList = new List<string>(args);
-
             SilentMode = args.Contains(Constants.SILENT_ARG);
 
             if (argsList.Contains(Constants.AUTOSTART_ARG))
@@ -26,6 +28,7 @@ namespace PowerGlue
                 argsList.Add((Config.GetWacherEnabled()) ? Constants.MONITOR_ARG : Constants.ONCE_ARG);
             }
 
+            // Determine what mode to run the tool
             if (argsList.Contains(Constants.MONITOR_ARG))
             {
                 // Start the monitor service
@@ -44,40 +47,41 @@ namespace PowerGlue
                     // Run with Form wrapper to show balloon message
                     Application.Run(new EventWatcher(EventWatcher.RUN_MODE.ONCE));
                 }
-            } else {
-                loadForm();
+            } else
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new ConfigForm());
             }
 
             return 1;
         }
-
-        public static bool SilentMode = false;
-
-        /*
-         * Main logic. Run this to apply the powerpoint registry hack.
-         */
-        static public bool Run()
+ 
+        // Main logic
+        static public ApplyResult Run()
         {
             // Load config
             DisplayMeta res = Config.LoadConfig();
+
+            // Scan for the target display (e.g. the projector) to see if it is attached to the machine
             var display = DisplayHelper.LookupFromMatch(res);
             if (display == null)
             {
-                // @todo log this event: Apply fail on autostart
-                return false;
+                // It's not.
+                return ApplyResult.Fail_NotDetected;
             }
-            PowerPointRegistry.applyConfig(display.DisplayName);
-            return true;
-        }
 
-        static private void loadForm()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainApp());
-        }
+            // Set PowerPoint to use that display using the up-to-date "DisplayName"
+            if (PowerPointRegistry.ApplyConfig(display.DisplayName))
+            {
+                return ApplyResult.Success_WriteOK;
+            } else
+            {
+                return ApplyResult.Success_NoWriteNeeded;
+            }
+        }        
 
-        // Log errors onto the Desktop
+        // Log errors to a file in the current directory
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             IniFile ini = new IniFile(Path.Combine(Environment.CurrentDirectory, "powerglue.ini"));
@@ -87,23 +91,11 @@ namespace PowerGlue
             Exception ex = (Exception)e.ExceptionObject;
             try
             {
-                writeErrorlog(Path.Combine(save_path, fileName), ex);
+                Utils.CrashLogging.DumpErrorToFile(Path.Combine(save_path, fileName), ex);
             } catch
             {
-                writeErrorlog(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), fileName), ex);
-            }
-        }
-
-        private static void writeErrorlog(String filePath, Exception e)
-        {
-            using (StreamWriter writer = new StreamWriter(filePath, true))
-            {
-                // Dump the error message
-                writer.WriteLine("PowerGlue" + Environment.NewLine + "A tool to lockdown PowerPoint output monitor configuration. Author: Jeremy Wong 2018." + Environment.NewLine + "Unhandled error. Message :" + e.Message + "<br/>" + Environment.NewLine + "StackTrace :" + e.StackTrace +
-                   "" + Environment.NewLine + "Date :" + DateTime.Now.ToString());
-                writer.WriteLine(Environment.NewLine + "-----------------------------------------------------------------------------" + Environment.NewLine);
+                Utils.CrashLogging.DumpErrorToFile(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), fileName), ex);
             }
         }
     }
-
 }

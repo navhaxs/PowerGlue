@@ -25,7 +25,7 @@ namespace Tests
         [TestMethod]
         public void TestMethod1()
         {
-            TestContext.WriteLine(message: PowerGlue.DisplayMethods.LookupPathFromMatch(
+            TestContext.WriteLine(message: PowerGlue.Models.DisplayHelper.LookupPathFromMatch(
                     new PowerGlue.DisplayMethods.MatchParamters{FriendlyNameContains = "U2515H"}
                 ));
             TestContext.WriteLine(message: PowerGlue.DisplayMethods.LookupPathFromMatch(

@@ -5,8 +5,7 @@
         public static bool GetWacherEnabled()
         {
             IniFile ini = new IniFile(Constants.INI_PATH);
-            bool result;
-            if (bool.TryParse(ini.IniReadValue("Monitor", "Enabled"), out result))
+            if (bool.TryParse(ini.IniReadValue("Monitor", "Enabled"), out bool result))
             {
                 return result;
             }
@@ -27,13 +26,11 @@
             result.DeviceName = ini.IniReadValue("MatchCriteria", "DeviceName");
             result.FriendlyName = ini.IniReadValue("MatchCriteria", "FriendlyName");
             result.EDIDManufactureCode = ini.IniReadValue("MatchCriteria", "EDIDManufactureCode");
-            int EDIDManufactureId = 0;
-            if (int.TryParse(ini.IniReadValue("MatchCriteria", "EDIDManufactureId"), out EDIDManufactureId))
+            if (int.TryParse(ini.IniReadValue("MatchCriteria", "EDIDManufactureId"), out int EDIDManufactureId))
             {
                 result.EDIDManufactureId = EDIDManufactureId;
             }
-            int EDIDProductCode = 0;
-            if (int.TryParse(ini.IniReadValue("MatchCriteria", "EDIDProductCode"), out EDIDProductCode))
+            if (int.TryParse(ini.IniReadValue("MatchCriteria", "EDIDProductCode"), out int EDIDProductCode))
             {
                 result.EDIDProductCode = EDIDProductCode;
             }

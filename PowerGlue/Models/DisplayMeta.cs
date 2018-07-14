@@ -7,12 +7,12 @@ namespace PowerGlue.Models
     [Serializable]
     public class DisplayMeta
     {
-        public string FriendlyName; // e.g. DELL U2515H (may be empty string e.g. some inbuilt LCD displays)
-        public string DeviceName; // e.g. DELL U2515H(DisplayPort), Wide viewing angle & High density FlexView Display 1920x1080
-        public string EDIDManufactureCode; // e.g. LEN
-        public int? EDIDManufactureId; // e.g.44592
-        public int? EDIDProductCode; // e.g. 16547
-        public string DevicePath; // Key/ID: Really long string in windows registry.
+        public string FriendlyName = null; // e.g. DELL U2515H (may be empty string e.g. some inbuilt LCD displays)
+        public string DeviceName = null; // e.g. DELL U2515H(DisplayPort), Wide viewing angle & High density FlexView Display 1920x1080
+        public string EDIDManufactureCode = null; // e.g. LEN
+        public int? EDIDManufactureId = null; // e.g.44592
+        public int? EDIDProductCode = null; // e.g. 16547
+        public string DevicePath = null; // Key/ID: Really long string in windows registry.
 
         public string GetDisplayName()
         {
@@ -48,6 +48,18 @@ namespace PowerGlue.Models
             {
                 return $"{DevicePath}";
             }
+        }
+
+        public bool IsEmpty()
+        {
+            return (
+                FriendlyName == null &&
+                DeviceName == null &&
+                EDIDManufactureCode == null &&
+                EDIDManufactureId == null &&
+                EDIDProductCode == null &&
+                DevicePath == null
+            );
         }
     }
 
@@ -94,6 +106,11 @@ namespace PowerGlue.Models
 
         public static WindowsDisplayAPI.Display LookupFromMatch(DisplayMeta matchArgs)
         {
+            if (matchArgs.IsEmpty())
+            {
+                return null;
+            }
+
             string targetDisplayPath = null;
             if (matchArgs.FriendlyName != null)
             {
@@ -192,30 +209,24 @@ namespace PowerGlue.Models
                 }
             } catch (Exception e)
             {
-
+                System.Diagnostics.Debug.Print(e.ToString());
             }
 
             try
             {
-                if (filtered.First().EDIDManufactureId != null)
-                {
-                    result.EDIDManufactureId = filtered.First().EDIDManufactureId;
-                }
+                result.EDIDManufactureId = filtered.First().EDIDManufactureId;    
             }
             catch (Exception e)
             {
-
+                System.Diagnostics.Debug.Print(e.ToString());
             }
 
             try
             {
-                if (filtered.First().EDIDProductCode != null)
-                {
-                    result.EDIDProductCode = filtered.First().EDIDProductCode;
-                }
+                 result.EDIDProductCode = filtered.First().EDIDProductCode;
             } catch (Exception e)
             {
-
+                System.Diagnostics.Debug.Print(e.ToString());
             }
 
             return result;

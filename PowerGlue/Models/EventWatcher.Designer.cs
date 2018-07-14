@@ -41,7 +41,7 @@
             this.notifyIcon1.ContextMenuStrip = this.contextMenuStrip1;
             this.notifyIcon1.Text = "PowerPoint output display monitor";
             this.notifyIcon1.Visible = true;
-            this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseClick);
+            this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.NotifyIcon1_MouseClick);
             // 
             // contextMenuStrip1
             // 
@@ -56,12 +56,12 @@
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(102, 24);
             this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
             // iconFlashTimer
             // 
             this.iconFlashTimer.Interval = 600;
-            this.iconFlashTimer.Tick += new System.EventHandler(this.iconFlashTimer_Tick);
+            this.iconFlashTimer.Tick += new System.EventHandler(this.IconFlashTimer_Tick);
             // 
             // EventWatcher
             // 

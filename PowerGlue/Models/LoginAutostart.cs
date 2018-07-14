@@ -2,7 +2,7 @@
 
 namespace PowerGlue.Models
 {
-    class StartupModel
+    class LoginAutostart
     {
         StartupManager StartupController = new StartupManager("PowerGlue", RegistrationScope.Local, false);
 

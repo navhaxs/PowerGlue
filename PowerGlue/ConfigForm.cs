@@ -9,17 +9,15 @@ using System.Windows.Forms;
 
 namespace PowerGlue
 {
-    public partial class MainApp : Form
+    public partial class ConfigForm : Form
     {       
 
-        StartupModel startup = new StartupModel();
+        LoginAutostart startup = new LoginAutostart();
 
         Dictionary<string, DisplayMeta> displays;
         string SelectedDevicePath;
 
-        private DisplayMeta meta;
-
-        public MainApp()
+        public ConfigForm()
         {
             InitializeComponent();
             UpdateUI();
@@ -27,8 +25,11 @@ namespace PowerGlue
         }
         private void UpdateMonitorStatus()
         {
-            labelDetectionServiceRunning.ForeColor = EventWatcher.isRunning() ? Color.ForestGreen : Color.Red;
-            labelDetectionServiceRunning.Text = "Event watcher is " + (EventWatcher.isRunning() ? "running" : "not running");
+            bool state = EventWatcher.IsRunning();
+            labelDetectionServiceRunning.ForeColor = state ? Color.ForestGreen : Color.Red;
+            labelDetectionServiceRunning.Text = "Event watcher is " + (state ? "running" : "not running");
+            pictureBox3.Image = Bitmap.FromHicon(new Icon((state ? Constants.OK_ICON : Constants.NO_ICON), new Size(24, 24)).Handle);
+
         }
 
         private void UpdateUI()
@@ -36,6 +37,7 @@ namespace PowerGlue
             checkBoxAutostartStatus.Checked = startup.IsRegistered();
             labelAutostartStatus.ForeColor = checkBoxAutostartStatus.Checked ? Color.ForestGreen : Color.Red;
             labelAutostartStatus.Text = "Apply on start-up is " + (checkBoxAutostartStatus.Checked ? "enabled" : "disabled");
+            pictureBox2.Image = Bitmap.FromHicon(new Icon((checkBoxAutostartStatus.Checked ? Constants.OK_ICON : Constants.NO_ICON), new Size(24, 24)).Handle);
 
             checkBoxDetectionServiceRunning.Checked = Config.GetWacherEnabled();
 
@@ -44,8 +46,17 @@ namespace PowerGlue
 
         private void MainApp_Load(object sender, EventArgs e)
         {
-            var config = Config.LoadConfig();
-            var display = DisplayHelper.LookupFromMatch(config);
+            Rescan();
+
+            // default initialize checklist with values from config
+            RedrawChecklist(Config.LoadConfig());
+        }
+
+        private void Rescan()
+        {
+            listBox1.Items.Clear();
+
+            var display = DisplayHelper.LookupFromMatch(Config.LoadConfig());
 
             displays = DisplayHelper.GetDisplays();
             foreach (var entry in displays)
@@ -58,14 +69,10 @@ namespace PowerGlue
                     listBox1.SelectedIndex = index;
                 }
             }
-
-
-            // default initialize checklist with values from config
-            redrawChecklist(config);
         }
 
         private bool isLoading = true;
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void ListBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (listBox1.SelectedIndex < 0)
                 return;
@@ -77,16 +84,16 @@ namespace PowerGlue
                 return;
             var displayDevice = DisplayHelper.GetMeta(display);
 
-            label9.Text = $"PowerPoint is set to show the output on display monitor \'{display.DisplayName}\'";
+            label9.Text = $"PowerPoint is set to show the output on display monitor \'{display.DisplayName}\'\nChanges are applied immediately";
             
-            redrawChecklist(displayDevice);
+            RedrawChecklist(displayDevice);
 
             Config.WriteConfig(displayDevice);
         
-            PowerPointRegistry.applyConfig(display.DisplayName);
+            PowerPointRegistry.ApplyConfig(display.DisplayName);
         }
 
-        private void redrawChecklist(DisplayMeta x)
+        private void RedrawChecklist(DisplayMeta x)
         {
             checkedListBox1.Items.Clear();
 
@@ -97,7 +104,7 @@ namespace PowerGlue
             checkedListBox1.Items.Add($"[EDID Product Code] {x.EDIDProductCode}", x.EDIDProductCode != null);
         }
 
-        private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void CheckedListBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (isLoading)
             {
@@ -114,20 +121,20 @@ namespace PowerGlue
                 return;
             var displayDevice = DisplayHelper.GetMeta(display);
 
-            redrawChecklist(displayDevice);
+            RedrawChecklist(displayDevice);
 
             Config.WriteConfig(displayDevice);
 
-            PowerPointRegistry.applyConfig(display.DisplayName);
+            PowerPointRegistry.ApplyConfig(display.DisplayName);
         }
 
-        private void checkBoxDetectionServiceRunning_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxDetectionServiceRunning_CheckedChanged(object sender, EventArgs e)
         {
             Config.SetWacherEnabled(checkBoxDetectionServiceRunning.Checked);
             UpdateUI();
         }
 
-        private void checkBoxAutostartStatus_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxAutostartStatus_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxAutostartStatus.Checked)
             {
@@ -140,19 +147,26 @@ namespace PowerGlue
             UpdateUI();
         }
 
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LinkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            ProcessStartInfo Info = new ProcessStartInfo();
-            Info.Arguments = Constants.MONITOR_ARG;
-            Info.FileName = Application.ExecutablePath;
+            ProcessStartInfo Info = new ProcessStartInfo
+            {
+                Arguments = Constants.MONITOR_ARG + (Program.SilentMode ? " " + Constants.SILENT_ARG : ""),
+                FileName = Application.ExecutablePath
+            };
             Process.Start(Info);
 
             UpdateUI();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             UpdateMonitorStatus();
+        }
+
+        private void LinkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Rescan();
         }
     }
 }
