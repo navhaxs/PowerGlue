@@ -98,9 +98,21 @@ namespace PowerGlue.Models
         {
             // hack: replace with an event debouncer
             System.Threading.Thread.Sleep(2000);
-            PowerGlue.Program.Run();
+            doWork();
         }
         #endregion
+
+        private void doWork()
+        {
+            if (Program.Run())
+            {
+                showBalloon($"Applied settings\n\nPowerPoint will output on display \"{Config.LoadConfig().GetShortName()}\"");
+            }
+            else
+            {
+                showBalloon($"Failed to apply settings\n\nDid not detect display \"{Config.LoadConfig().GetShortName()}\"");
+            }
+        }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -111,11 +123,15 @@ namespace PowerGlue.Models
         {
             if (e.Button == MouseButtons.Left)
             {
-                string title = $"PowerPoint will output on display \"{Config.LoadConfig().GetShortName()}\"\n\nLaunch the PowerGlue UI to change the output display";
-                //title = (title.Length >= 64) ? title.Substring(0, 60) + "..." : title;
-                notifyIcon1.BalloonTipText = title;
-                notifyIcon1.ShowBalloonTip(30);
+                doWork();
             }
+        }
+
+        private void showBalloon(string title)
+        {
+            //title = (title.Length >= 64) ? title.Substring(0, 60) + "..." : title;
+            notifyIcon1.BalloonTipText = title;
+            notifyIcon1.ShowBalloonTip(30);
         }
     }
 }

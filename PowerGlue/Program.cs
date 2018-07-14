@@ -23,12 +23,14 @@ namespace PowerGlue
 
                 try
                 {
+                    // @todo move balloon here
                     Run();
                 } catch (Exception e) {
                     return -1;
                 }
-                return 1;
             }
+
+            // @todo silent flag
 
             if (args.Contains(Constants.MONITOR_ARG))
             {
@@ -49,7 +51,7 @@ namespace PowerGlue
         /*
          * Main logic. Run this to apply the powerpoint registry hack.
          */
-        static public void Run()
+        static public bool Run()
         {
             // Load config
             DisplayMeta res = Config.LoadConfig();
@@ -57,9 +59,10 @@ namespace PowerGlue
             if (display == null)
             {
                 // @todo log this event: Apply fail on autostart
-                return;
+                return false;
             }
             PowerPointRegistry.applyConfig(display.DisplayName);
+            return true;
         }
 
         static private void loadForm()

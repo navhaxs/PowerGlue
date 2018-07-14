@@ -88,7 +88,7 @@
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(606, 45);
             this.label10.TabIndex = 16;
-            this.label10.Text = "Force the PowerPoint output monitor";
+            this.label10.Text = "Force the PowerPoint output monitor using EDID property matching";
             // 
             // label1
             // 
@@ -119,7 +119,7 @@
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(263, 20);
             this.label8.TabIndex = 0;
-            this.label8.Text = "Build 20180711 (C) Jeremy Wong 2018";
+            this.label8.Text = "Build 20180714 (C) Jeremy Wong 2018";
             // 
             // labelAutostartStatus
             // 
