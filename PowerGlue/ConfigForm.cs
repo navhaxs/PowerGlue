@@ -62,7 +62,7 @@ namespace PowerGlue
                 }
             } catch (Exception ex)
             {
-                CrashLogging.DumpError(ex);
+                Logging.DumpError(ex);
             }
         }
 
@@ -165,7 +165,7 @@ namespace PowerGlue
         {
             ProcessStartInfo Info = new ProcessStartInfo
             {
-                Arguments = Constants.MONITOR_ARG + (Program.SilentMode ? " " + Constants.SILENT_ARG : ""),
+                Arguments = Constants.MONITOR_ARG + (Program.SilentMode ? " " + Constants.SILENT_ARG : "") + (Program.TraceMode ? " " + Constants.TRACE_ARG : ""),
                 FileName = Application.ExecutablePath
             };
             Process.Start(Info);

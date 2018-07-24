@@ -14,8 +14,9 @@ namespace PowerGlue.Models
         public const string AUTOSTART_ARG = "--startup";
         public const string MONITOR_ARG = "--monitor";
         public const string ONCE_ARG = "--run";
-
+       
         // Option flags
         public const string SILENT_ARG = "--no-balloon";
+        public const string TRACE_ARG = "--trace";
     }
 }

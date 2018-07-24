@@ -42,27 +42,7 @@ namespace PowerGlue.Models
 
             debouncedWrapper = a.Debounce();
 
-            if (mode == RUN_MODE.MONITOR)
-            {
-                // Set up pidfile to enforce a single instance of the monitor
-                var fileLock = SimpleFileLock.Create(Constants.PIDLOCK_PATH);
-                if (!fileLock.TryAcquireLock())
-                {
-                    Close();
-                    // Another instance of this program is already running on the machine (silent exit)
-                    return;
-                }
-
-                SystemEvents.PowerModeChanged += OnPowerChange;
-                this.FormClosed += EventWatcher_FormClosed;
-
-                // Run it now
-                DoWork();
-            } else if (mode == RUN_MODE.ONCE)
-            {
-                // Run it now
-                DoWork();
-            }
+            
         }
 
         #region "hide winform"
@@ -121,6 +101,31 @@ namespace PowerGlue.Models
         private void EventWatcher_Load(object sender, EventArgs e)
         {
             notifyIcon1.Icon = Constants.DEFAULT_ICON;
+
+            // onLoad
+            if (runMode == RUN_MODE.MONITOR)
+            {
+                // Set up pidfile to enforce a single instance of the monitor
+                var fileLock = SimpleFileLock.Create(Constants.PIDLOCK_PATH);
+                if (!fileLock.TryAcquireLock())
+                {
+                    Close();
+                    // Another instance of this program is already running on the machine (silent exit)
+                    return;
+                }
+
+                SystemEvents.PowerModeChanged += OnPowerChange;
+                this.FormClosed += EventWatcher_FormClosed;
+
+                // Run it now
+                DoWork();
+            }
+            else if (runMode == RUN_MODE.ONCE)
+            {
+                // Run it now
+                DoWork();
+                Close();
+            }
         }
 
         private void EventWatcher_FormClosed(object sender, FormClosedEventArgs e)
@@ -156,12 +161,13 @@ namespace PowerGlue.Models
             {
                 string reason = (mode == RUN_MODE.MONITOR) ? "Display change detected" : "Applied settings";
 
-                if (Program.Run() == ApplyResult.Success_WriteOK)
+                var res = Program.Run();
+                if (res == ApplyResult.Success_WriteOK)
                 {
                     FlashIcon(Constants.OK_ICON);
                     if (!Program.SilentMode) ShowBalloon($"{reason}\n\nPowerPoint will output on display \"{Config.LoadConfig().GetShortName()}\"");
                 }
-                else if (Program.Run() == ApplyResult.Fail_NotDetected)
+                else if (res == ApplyResult.Fail_NotDetected)
                 {
                     FlashIcon(Constants.NO_ICON);
                     if (!Program.SilentMode) ShowBalloon($"Failed to apply settings\n\nDid not detect display \"{Config.LoadConfig().GetShortName()}\"");
@@ -217,6 +223,5 @@ namespace PowerGlue.Models
             notifyIcon1.Icon = (flashCounter % 2 == 0) ? icon : Constants.DEFAULT_ICON;
         }
         #endregion
-
     }
 }

@@ -106,9 +106,15 @@ namespace PowerGlue.Models
 
         public static WindowsDisplayAPI.Display LookupFromMatch(DisplayMeta matchArgs)
         {
+            string log = "";
+
             if (matchArgs.IsEmpty())
             {
+                log += "match args is empty";
                 return null;
+            } else
+            {
+                log += matchArgs.ToString();
             }
 
             string targetDisplayPath = null;
@@ -123,34 +129,55 @@ namespace PowerGlue.Models
 
                         if (!String.IsNullOrEmpty(matchArgs.FriendlyName))
                         {
+                            log += $"x.FriendlyName = {x.FriendlyName}\n";
                             results.Add(x.FriendlyName == matchArgs.FriendlyName);
                         }
 
                         if (!String.IsNullOrEmpty(matchArgs.EDIDManufactureCode))
                         {
-                            results.Add(x.EDIDManufactureCode == matchArgs.EDIDManufactureCode);
+                            var val = GetCheckedEDIDManufactureCode(x);
+                            if (val != null)
+                            {
+                                log += $"x.EDIDManufactureCode = {x.EDIDManufactureCode}\n";
+                                results.Add(val == matchArgs.EDIDManufactureCode);
+                            }
                         }
 
                         if (matchArgs.EDIDManufactureId != null)
                         {
-                            results.Add(x.EDIDManufactureId == matchArgs.EDIDManufactureId);
+                            var val = GetCheckedEDIDManufactureId(x);
+                            if (val != null)
+                            {
+                                log += $"x.EDIDManufactureId = {val}\n";
+                                results.Add(val == matchArgs.EDIDManufactureId);
+                            }
                         }
 
                         if (matchArgs.EDIDProductCode != null)
                         {
-                            results.Add(x.EDIDProductCode == matchArgs.EDIDProductCode);
+                            var val = GetCheckedEDIDProductCode(x);
+                            if (val != null)
+                            {
+                                log += $"x.EDIDProductCode = {val}\n";
+                                results.Add(val == matchArgs.EDIDProductCode);
+                            }
                         }
 
                         return results.All((y) => y == true);
                     });
 
                 if (filteredDisplays.Count() == 0)
+                {
+
+                    log += "FAIL: filteredDisplays.Count() == 0\n";
                     return null; // throw new Exception("No matching friendly name");
+                }
 
                 // Get the device path of the target (e.g. \\?\DISPLAY#LEN40A3#4&24eea73b&0&UID265988#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7})
                 targetDisplayPath = filteredDisplays.First().DevicePath;
 
             }
+            log += $"PASS check 1\n";
 
             // Lookup the display name (something like \\.\DISPLAY1 ) from the device path
             var match = WindowsDisplayAPI.Display.GetDisplays()
@@ -161,16 +188,19 @@ namespace PowerGlue.Models
 
                     if (!String.IsNullOrEmpty(targetDisplayPath))
                     {
+                        log += $"{x.DevicePath}\n";
                         results.Add(x.DevicePath == targetDisplayPath);
                     }
 
                     if (!String.IsNullOrEmpty(matchArgs.DeviceName))
                     {
+                        log += $"{x.DeviceName}\n";
                         results.Add(x.DeviceName == matchArgs.DeviceName);
                     }
 
                     if (!String.IsNullOrEmpty(matchArgs.DevicePath))
                     {
+                        log += $"{x.DevicePath}\n";
                         results.Add(x.DevicePath == matchArgs.DevicePath);
                     }
 
@@ -178,9 +208,50 @@ namespace PowerGlue.Models
                 });
 
             if (match.Count() == 0)
+            {
+                log += "FAIL: match.Count() == 0";
+                Utils.Logging.DumpLog(log);
                 return null; // throw new Exception("Did not find display with corresponding display path");
+            }
 
+            log += $"SUCCESS: {match.First().DisplayName}";
+            Utils.Logging.DumpLog(log);
             return match.First();
+        }
+
+        public static String GetCheckedEDIDManufactureCode(WindowsDisplayAPI.DisplayConfig.PathDisplayTarget x)
+        {
+            try
+            {
+                return x.EDIDManufactureCode;
+            } catch (WindowsDisplayAPI.Exceptions.InvalidEDIDInformation e)
+            {
+                return null;
+            }
+        }
+
+        public static int? GetCheckedEDIDManufactureId(WindowsDisplayAPI.DisplayConfig.PathDisplayTarget x)
+        {
+            try
+            {
+                return x.EDIDManufactureId;
+            }
+            catch (WindowsDisplayAPI.Exceptions.InvalidEDIDInformation e)
+            {
+                return null;
+            }
+        }
+
+        public static int? GetCheckedEDIDProductCode(WindowsDisplayAPI.DisplayConfig.PathDisplayTarget x)
+        {
+            try
+            {
+                return x.EDIDProductCode;
+            }
+            catch (WindowsDisplayAPI.Exceptions.InvalidEDIDInformation e)
+            {
+                return null;
+            }
         }
 
         public static DisplayMeta GetMeta(WindowsDisplayAPI.Display display)

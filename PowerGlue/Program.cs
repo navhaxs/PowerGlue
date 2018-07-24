@@ -2,7 +2,6 @@
 using PowerGlue.Utils;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -12,6 +11,7 @@ namespace PowerGlue
     {
 
         public static bool SilentMode = false;
+        public static bool TraceMode = false;
 
         /// <summary>
         /// The main entry point for the application.
@@ -22,7 +22,9 @@ namespace PowerGlue
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
         
             List<string> argsList = new List<string>(args);
+            // @jeremy TODO load from config as well
             SilentMode = args.Contains(Constants.SILENT_ARG);
+            TraceMode = args.Contains(Constants.TRACE_ARG);
 
             if (argsList.Contains(Constants.AUTOSTART_ARG))
             {
@@ -86,7 +88,7 @@ namespace PowerGlue
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            CrashLogging.DumpError(ex);
+            Logging.DumpError(ex);
         }
     }
 }
