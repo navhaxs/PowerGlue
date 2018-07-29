@@ -172,6 +172,11 @@ namespace PowerGlue.Models
                     FlashIcon(Constants.NO_ICON);
                     if (!Program.SilentMode) ShowBalloon($"Failed to apply settings\n\nDid not detect display \"{Config.LoadConfig().GetShortName()}\"");
                 }
+                else if (res == ApplyResult.Success_NoWriteNeeded)
+                {
+                    // no need for balloon, but flash the tray icon for assurance
+                    FlashIcon(Constants.OK_ICON);
+                }
             }
         }
 

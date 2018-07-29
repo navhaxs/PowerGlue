@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using WindowsDisplayAPI;
@@ -14,7 +15,7 @@ namespace PowerGlue.Models
         static internal bool ApplyConfig(string target_match)
         {
             // Get displays
-            var displays = Display.GetDisplays();
+            IEnumerable<Display> displays = Display.GetDisplays();
 
             // Attempt to match
             var m = displays.Where(d => d.ToString().Contains(target_match)).First();
@@ -43,7 +44,8 @@ namespace PowerGlue.Models
             // Write it to powerpoint's registry
             RegistryKey key = Registry.CurrentUser.OpenSubKey(path + @"\PowerPoint\Options", true);
 
-            if (key.GetValue("DisplayMonitor").ToString() == m.DisplayName)
+            var oldValue = key.GetValue("DisplayMonitor", null);
+            if (oldValue != null && oldValue.ToString() == m.DisplayName)
             {
                 return false;
             }

@@ -129,8 +129,8 @@ namespace PowerGlue.Models
 
                         if (!String.IsNullOrEmpty(matchArgs.FriendlyName))
                         {
-                            log += $"x.FriendlyName = {x.FriendlyName}\n";
-                            results.Add(x.FriendlyName == matchArgs.FriendlyName);
+                            log += $"1. FriendlyName = {x.FriendlyName}\n";
+                            results.Add(x.FriendlyName.Trim() == matchArgs.FriendlyName.Trim());
                         }
 
                         if (!String.IsNullOrEmpty(matchArgs.EDIDManufactureCode))
@@ -138,8 +138,8 @@ namespace PowerGlue.Models
                             var val = GetCheckedEDIDManufactureCode(x);
                             if (val != null)
                             {
-                                log += $"x.EDIDManufactureCode = {x.EDIDManufactureCode}\n";
-                                results.Add(val == matchArgs.EDIDManufactureCode);
+                                log += $"2. EDIDManufactureCode = {x.EDIDManufactureCode}\n";
+                                results.Add(val.Trim() == matchArgs.EDIDManufactureCode.Trim());
                             }
                         }
 
@@ -148,7 +148,7 @@ namespace PowerGlue.Models
                             var val = GetCheckedEDIDManufactureId(x);
                             if (val != null)
                             {
-                                log += $"x.EDIDManufactureId = {val}\n";
+                                log += $"3. EDIDManufactureId = {val}\n";
                                 results.Add(val == matchArgs.EDIDManufactureId);
                             }
                         }
@@ -158,11 +158,12 @@ namespace PowerGlue.Models
                             var val = GetCheckedEDIDProductCode(x);
                             if (val != null)
                             {
-                                log += $"x.EDIDProductCode = {val}\n";
+                                log += $"4. EDIDProductCode = {val}\n";
                                 results.Add(val == matchArgs.EDIDProductCode);
                             }
                         }
 
+                        log += '\n';
                         return results.All((y) => y == true);
                     });
 

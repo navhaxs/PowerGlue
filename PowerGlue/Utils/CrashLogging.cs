@@ -10,12 +10,11 @@ namespace PowerGlue.Utils
         {
             IniFile ini = new IniFile(Path.Combine(Environment.CurrentDirectory, "powerglue.ini"));
             var save_path = ini.IniReadValue("PowerGlue", "LogPath");
-            var fileName = $"Error_{DateTime.Now:yyyyMMdd_hhmmss}.txt";
+            var fileName = $"Trace_{DateTime.Now:yyyyMMdd_hhmmss}.txt";
 
             try
             {
                 Utils.Logging.DumpLogToFile(Path.Combine(save_path, fileName), log);
-                MessageBox.Show(log);
             }
             catch
             {
@@ -41,10 +40,15 @@ namespace PowerGlue.Utils
 
         private static void DumpLogToFile(String filePath, String log)
         {
+            if (!Program.TraceMode)
+            {
+                return;
+            }
+
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
                 // Dump the log message
-                writer.WriteLine("PowerGlue" + Environment.NewLine + "A tool to lockdown PowerPoint output monitor configuration. Author: Jeremy Wong 2018." + Environment.NewLine + "Unhandled error. TRACE:" + Environment.NewLine + log +
+                writer.WriteLine("PowerGlue" + Environment.NewLine + "A tool to lockdown PowerPoint output monitor configuration. Author: Jeremy Wong 2018." + Environment.NewLine + "TRACE:" + Environment.NewLine + log +
                    "" + Environment.NewLine + "Date :" + DateTime.Now.ToString());
                 writer.WriteLine(Environment.NewLine + "-----------------------------------------------------------------------------" + Environment.NewLine);
             }
