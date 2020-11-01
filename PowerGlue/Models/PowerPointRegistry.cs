@@ -21,10 +21,10 @@ namespace PowerGlue.Models
             var m = displays.Where(d => d.ToString().Contains(target_match)).First();
             string path = null;
             string[] try_paths = {
-                @"Software\Microsoft\Office\16.0",
-                @"Software\Microsoft\Office\15.0",
-                @"Software\Microsoft\Office\14.0",
-                @"Software\Microsoft\Office\12.0"
+                @"Software\Microsoft\Office\16.0\PowerPoint\Options",
+                @"Software\Microsoft\Office\15.0\PowerPoint\Options",
+                @"Software\Microsoft\Office\14.0\PowerPoint\Options",
+                @"Software\Microsoft\Office\12.0\PowerPoint\Options"
             };
 
             foreach (string i in try_paths)
@@ -42,7 +42,7 @@ namespace PowerGlue.Models
             }
 
             // Write it to powerpoint's registry
-            RegistryKey key = Registry.CurrentUser.OpenSubKey(path + @"\PowerPoint\Options", true);
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(path, true);
 
             var oldValue = key.GetValue("DisplayMonitor", null);
             if (oldValue != null && oldValue.ToString() == m.DisplayName)
